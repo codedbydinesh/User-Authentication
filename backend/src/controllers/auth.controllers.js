@@ -9,12 +9,10 @@ export const signUp = async (req, res) => {
 
     let profileImage;
 
-    if(req.file){
-      profileImage = await uploadImageOnCloudinary(req.file.path)
+    if (req.file) {
+      profileImage = await uploadImageOnCloudinary(req.file.path);
     }
     console.log(profileImage);
-    
-    
 
     if (!firstName || !lastName || !email || !password || !userName) {
       return res.status(400).json({ message: "All fields are required" });
@@ -34,17 +32,17 @@ export const signUp = async (req, res) => {
       email,
       password: hashedPassword,
       userName,
-      profileImage
+      profileImage,
     });
 
     let token = generateToken(user._id);
 
     let option = {
-      httpOnly:true,
-      secure:true,
-    }
-    res.cookie("token", token, option)
-    
+      httpOnly: true,
+      secure: true,
+    };
+    res.cookie("token", token, option);
+
     return res.status(201).json({
       message: "User registered successfully",
       user: {
@@ -52,12 +50,9 @@ export const signUp = async (req, res) => {
         lastName,
         email,
         userName,
-        profileImage
+        profileImage,
       },
     });
-
-
-
   } catch (error) {
     return res.status(500).json({
       message: "server error",
@@ -66,32 +61,31 @@ export const signUp = async (req, res) => {
   }
 };
 
-
 export const login = async (req, res) => {
   try {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
-    let existUser = await User.findOne({email})
+    let existUser = await User.findOne({ email });
 
-    if(!existUser) {
-      return res.status(400).json({message:"user does't exist"})
+    if (!existUser) {
+      return res.status(400).json({ message: "user does't exist" });
     }
 
     let matchPassword = await bcrypt.compare(password, existUser.password);
 
-    if(!matchPassword){
+    if (!matchPassword) {
       return res.status(400).json({
-        message:"Incorrect Password"
-      })
+        message: "Incorrect Password",
+      });
     }
 
     let token = generateToken(existUser._id);
 
     let option = {
-      httpOnly:true,
-      secure:true,
-    }
-    res.cookie("token", token, option)
+      httpOnly: true,
+      secure: true,
+    };
+    res.cookie("token", token, option);
 
     return res.status(200).json({
       message: "User loggedIn",
@@ -100,45 +94,41 @@ export const login = async (req, res) => {
         lastName: existUser.lastName,
         email: existUser.email,
         userName: existUser.userName,
-        profileImage: existUser.profileImage
+        profileImage: existUser.profileImage,
       },
-    })
-
+    });
   } catch (error) {
     return res.status(500).json({
-      message:"invalid ID or password",
-      error:error.message,
-    })
-    
+      message: "invalid ID or password",
+      error: error.message,
+    });
   }
-}
+};
 
 export const logout = async (req, res) => {
   try {
     res.clearCookie("token");
     return res.status(200).json({
-      message:"logout successfully"
-    })
+      message: "logout successfully",
+    });
   } catch (error) {
-    return res.status(500).json(error)
+    return res.status(500).json(error);
   }
-}
+};
 
 export const getUserData = async (req, res) => {
   try {
-    let userId = req.userId
-    if(!userId){
-      return res.status(400).json({message:"user is not found"})
-
+    let userId = req.userId;
+    if (!userId) {
+      return res.status(400).json({ message: "user is not found" });
     }
 
-    let user = await User.findById(userId);
-    if(!user){
-      return res.status(400).json({message:"user is not found"})
-
+    let user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(400).json({ message: "user is not found" });
     }
-    return res.status(200).json(user)
+    return res.status(200).json(user);
   } catch (error) {
-    return res.status(500).json({message:error})
+    return res.status(500).json({ message: error });
   }
-}
+};
