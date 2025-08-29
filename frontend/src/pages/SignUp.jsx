@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
 
-    const {serverUrl} = useContext(dataContext)
+    const {serverUrl, userData, setUserData, getUserData} = useContext(dataContext)
     let navigate = useNavigate()
 
     let [firstName, setFirstName] = useState("")
@@ -39,7 +39,11 @@ const SignUp = () => {
                 headers:{"Content-Type":"multipart/form-data"}
             })
             console.log(res.data);
-            
+            setUserData(res.data)
+            await getUserData()
+            if(userData){
+              navigate('/')
+            }
             
         } catch (error) {
             console.log("Error",error.message);

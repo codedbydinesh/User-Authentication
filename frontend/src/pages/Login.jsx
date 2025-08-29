@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
-  const {serverUrl} = useContext(dataContext)
+  const {serverUrl, userData, setUserData, getUserData} = useContext(dataContext)
     let navigate = useNavigate()
     let [email, setEmail] = useState('')
     let [password, setPassword] = useState('')
@@ -20,7 +20,11 @@ const Login = () => {
             })
 
             console.log(res.data);
-            
+            setUserData(res.data)
+            await getUserData()
+            if(userData){
+              navigate('/')
+            }
             
         } catch (error) {
             console.log("Error: ",error.response.data.message);
